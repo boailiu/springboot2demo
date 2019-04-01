@@ -18,4 +18,3 @@ mybatis:
   configuration:
     call-setters-on-nulls: true
     map-underscore-to-camel-case: true
-  type-aliases-package: com.boai.springboot2demo.Model
