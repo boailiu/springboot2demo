@@ -13,8 +13,3 @@ spring:
 server:
   port: 9455
 
-mybatis:
-  mapper-locations: classpath:com/boai/springbootdemo/mapper/*.xml
-  configuration:
-    call-setters-on-nulls: true
-    map-underscore-to-camel-case: true
