@@ -103,6 +103,13 @@
                     <artifactId>spring-webmvc</artifactId>
                     <version>5.0.9.RELEASE</version>
                 </dependency>-->
+
+        <!-- AspectJ -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.8.9</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -113,12 +120,12 @@
             </plugin>
         </plugins>
         <resources>
-<!--            <resource>
-                <directory>src/main/java</directory>
-                <includes>
-                    <include>**/*.xml</include>
-                </includes>
-            </resource>-->
+            <!--            <resource>
+                            <directory>src/main/java</directory>
+                            <includes>
+                                <include>**/*.xml</include>
+                            </includes>
+                        </resource>-->
             <resource>
                 <directory>src/main/resources/-common-</directory>
                 <includes>
