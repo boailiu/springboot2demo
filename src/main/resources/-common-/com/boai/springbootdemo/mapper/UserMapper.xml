@@ -3,7 +3,7 @@
 <mapper namespace="com.boai.springboot2demo.Mapper.UserMapper">
     <select id="getUserById" parameterType="java.lang.Long"
             resultType="com.boai.springboot2demo.Model.User">
-        SELECT id,name,email FROM USER
+        SELECT id,name,email FROM `User`
         WHERE id = #{id}
     </select>
 
