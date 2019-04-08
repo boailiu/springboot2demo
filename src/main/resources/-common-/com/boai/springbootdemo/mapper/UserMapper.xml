@@ -7,4 +7,18 @@
         WHERE id = #{id}
     </select>
 
+    <select id="listUser" resultType="com.boai.springboot2demo.Model.User">
+        SELECT id,name,email
+        FROM `User`
+    </select>
+
+    <select id="getUserMap" resultType="java.util.Map">
+        SELECT
+        id    AS id,
+        name  AS name,
+        email AS email
+        FROM `User`
+        WHERE id = #{id}
+    </select>
+
 </mapper>

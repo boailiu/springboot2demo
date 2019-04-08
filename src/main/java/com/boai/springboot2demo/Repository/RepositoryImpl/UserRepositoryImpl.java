@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -49,6 +50,11 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public List<User> listUser() {
-        return new ArrayList<>(this.userMap.values());
+        return userMapper.listUser();
+    }
+
+    @Override
+    public Map<String, Object> getUserMap(long userId) {
+        return userMapper.getUserMap(userId);
     }
 }

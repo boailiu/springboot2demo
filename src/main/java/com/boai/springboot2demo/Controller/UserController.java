@@ -1,23 +1,27 @@
 package com.boai.springboot2demo.Controller;
 
-import com.boai.springboot2demo.Exception.CommonException;
 import com.boai.springboot2demo.Model.User;
 import com.boai.springboot2demo.Repository.UserRepository;
+import com.boai.springboot2demo.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/user")
 public class UserController {
 
     private UserRepository uRepo;
+    private UserService uService;
 
     @Autowired
-    public UserController(UserRepository uRepo) {
+    public UserController(UserRepository uRepo, UserService userService) {
         this.uRepo = uRepo;
+        this.uService = userService;
     }
 
 
@@ -35,15 +39,21 @@ public class UserController {
         user.setEmail("test@163.com");
         uRepo.saveOrUpdateUser(user);
     }
+
+    @GetMapping("/getUserMap/{userId}")
+    public Map<String, Object> getUserMap(@PathVariable("userId") long userId) {
+        return uService.getUserMap(userId);
+    }
+
     @GetMapping("testVoid")
-    public void testVoid(){
+    public void testVoid() {
 
     }
 
     @GetMapping("/testException")
     public void ex() throws Exception {
 //        throw new CommonException(4000, "测试的公共错误");
-        throw new Exception("测试的公共错误",new Throwable());
+        throw new Exception("测试的公共错误", new Throwable());
     }
 
 
