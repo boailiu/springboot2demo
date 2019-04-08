@@ -37,8 +37,9 @@ public class UserController {
     }
 
     @GetMapping("/testException")
-    public void ex() {
-        throw new CommonException(4000, "测试的公共错误");
+    public void ex() throws Exception {
+//        throw new CommonException(4000, "测试的公共错误");
+        throw new Exception("测试的公共错误",new Throwable());
     }
 
 
