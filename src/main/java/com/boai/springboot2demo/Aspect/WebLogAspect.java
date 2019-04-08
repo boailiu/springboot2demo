@@ -31,10 +31,12 @@ public class WebLogAspect {
         HttpServletRequest request = attributes.getRequest();
         logger.info("requestUrl :" + request.getRequestURL());
         Object proceed = joinPoint.proceed();
-        if (proceed instanceof User) {
-            ((User) proceed).setEmail("newEmail@123.com");
+        if (proceed != null) {
+            if (proceed instanceof User) {
+                ((User) proceed).setEmail("newEmail@123.com");
+            }
+            logger.info("return result :" + proceed.toString());
         }
-        logger.info("return result :" + proceed.toString());
         return proceed;
     }
 }

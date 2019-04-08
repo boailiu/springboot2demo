@@ -35,6 +35,10 @@ public class UserController {
         user.setEmail("test@163.com");
         uRepo.saveOrUpdateUser(user);
     }
+    @GetMapping("testVoid")
+    public void testVoid(){
+
+    }
 
     @GetMapping("/testException")
     public void ex() throws Exception {
