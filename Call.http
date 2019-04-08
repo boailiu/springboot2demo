@@ -10,12 +10,19 @@ GET http://localhost:9455/user/testException
 
 ###
 
-GET http://localhost:9455/redis/addKey/key2/3
+GET http://localhost:9455/redis/addKey/testKeyMap:key1/1
 
 ###
 GET http://localhost:9455/redis/getValue/key2
 
 ###
 GET http://localhost:9455/user/testVoid
+
+###
+
+GET http://localhost:9455/redis/addUser
+
+###
+GET http://localhost:9455/redis/getUser
 
 ###
