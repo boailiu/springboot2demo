@@ -11,4 +11,8 @@ public class CheckUtil {
     public static boolean checkMobile(String mobile) {
         return Pattern.matches("^1[1-9]{2}[0-9]{8}", mobile);
     }
+
+    public static boolean checkUrl(String url){
+        return Pattern.matches("^[http|https]+[://]+",url);
+    }
 }
