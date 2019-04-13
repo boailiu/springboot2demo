@@ -12,6 +12,10 @@ public class CheckUtil {
         return Pattern.matches("^1[1-9]{2}[0-9]{8}", mobile);
     }
 
+    public static boolean checkCertNo(String certNo){
+        return Pattern.matches("\\d{17}[0-9xX]",certNo);
+    }
+
     public static boolean checkUrl(String url){
         return Pattern.matches("^[http|https]+[://]+",url);
     }

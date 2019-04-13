@@ -17,4 +17,10 @@ public class CheckUtilTest {
         String mobile = "18810901242";
         System.out.println(CheckUtil.checkMobile(mobile));
     }
+
+    @Test
+    public void checkCertNo(){
+        String certNo = "32083119940513421X";
+        System.out.println(CheckUtil.checkCertNo(certNo));
+    }
 }

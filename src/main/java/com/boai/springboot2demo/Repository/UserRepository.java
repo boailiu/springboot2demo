@@ -16,4 +16,6 @@ public interface UserRepository {
     List<User> listUser();
 
     Map<String,Object> getUserMap(long userId);
+
+    Map<String,Object> getUserMapByName(String name);
 }

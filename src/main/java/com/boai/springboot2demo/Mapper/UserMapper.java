@@ -13,4 +13,6 @@ public interface UserMapper {
     List<User> listUser();
 
     Map<String, Object> getUserMap(long id);
+
+    Map<String, Object> getUserMapByName(String name);
 }

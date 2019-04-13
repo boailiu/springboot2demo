@@ -57,4 +57,9 @@ public class UserRepositoryImpl implements UserRepository {
     public Map<String, Object> getUserMap(long userId) {
         return userMapper.getUserMap(userId);
     }
+
+    @Override
+    public Map<String, Object> getUserMapByName(String name) {
+        return userMapper.getUserMapByName(name);
+    }
 }

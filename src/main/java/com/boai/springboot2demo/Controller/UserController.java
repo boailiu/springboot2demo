@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -43,6 +44,20 @@ public class UserController {
     @GetMapping("/getUserMap/{userId}")
     public Map<String, Object> getUserMap(@PathVariable("userId") long userId) {
         return uService.getUserMap(userId);
+    }
+
+    @GetMapping("/userList")
+    public Map<String, Object> getUserList() {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("userList", uService.listUser());
+        return map;
+    }
+
+    @GetMapping("/search/{name}")
+    public Map<String, Object> search(@PathVariable("name") String name){
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("user", uService.getUserMapByName(name));
+        return map;
     }
 
     @GetMapping("testVoid")

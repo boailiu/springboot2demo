@@ -21,4 +21,28 @@
         WHERE id = #{id}
     </select>
 
+    <!--
+        <select id="getUserMapByName" resultType="java.util.Map">
+            SELECT
+            id    AS id,
+            name  AS name,
+            email AS email
+            FROM `User`
+            WHERE name LIKE CONCAT('%',#{name},'%')
+        </select>
+    -->
+
+    <select id="getUserMapByName" parameterType="java.lang.String" resultType="java.util.Map">
+        SELECT
+        id AS id,
+        name AS name,
+        email AS email
+        FROM `User`
+        WHERE 1=1
+        <if test="_parameter != null and _parameter != ''">
+            <bind name="pattern" value="'%' + _parameter + '%'"></bind>
+            and name LIKE #{pattern}
+        </if>
+    </select>
+
 </mapper>
