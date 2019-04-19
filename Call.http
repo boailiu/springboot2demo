@@ -37,3 +37,7 @@ GET http://localhost:9455/user/userList
 GET http://localhost:9455/user/search/test
 
 ###
+
+GET http://localhost:9455/user/sendMessage/firstMessage
+
+###
