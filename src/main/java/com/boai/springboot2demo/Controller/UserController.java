@@ -1,11 +1,14 @@
 package com.boai.springboot2demo.Controller;
 
+import com.boai.springboot2demo.Config.RabbitMQConfig;
 import com.boai.springboot2demo.Model.User;
 import com.boai.springboot2demo.Repository.UserRepository;
 import com.boai.springboot2demo.Service.UserService;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,27 +26,20 @@ import java.util.concurrent.TimeoutException;
 @RequestMapping("/user")
 public class UserController {
 
+    private static final Logger logger_ = LoggerFactory.getLogger(UserController.class);
+
     private UserRepository uRepo;
     private UserService uService;
     private AmqpTemplate amqpTemplate;
-
-    @Value("${spring.rabbitmq.host}")
-    private String host;
-
-    @Value("${spring.rabbitmq.port}")
-    private int port;
-
-    @Value("${spring.rabbitmq.username}")
-    private String userName;
-
-    @Value("${spring.rabbitmq.password}")
-    private String password;
+    private Channel channel;
 
     @Autowired
-    public UserController(UserRepository uRepo, UserService userService, AmqpTemplate amqpTemplate) {
+    public UserController(UserRepository uRepo, UserService userService, AmqpTemplate amqpTemplate,
+                          Channel channel) {
         this.uRepo = uRepo;
         this.uService = userService;
         this.amqpTemplate = amqpTemplate;
+        this.channel = channel;
     }
 
 
@@ -101,23 +97,16 @@ public class UserController {
     @GetMapping("/sendMessage/{message}")
     public void sendMessage(@PathVariable("message") String message) {
 //        amqpTemplate.convertAndSend("bootTestQueue", message);
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setUsername(userName);
-        factory.setPassword(password);
-        factory.setHost(host);
-        factory.setPort(port);
-
         try {
-            Connection connection = factory.newConnection();
-            Channel channel = connection.createChannel();
-            channel.queueDeclare("bootTestQueue", true, false, false, null);
-
-            channel.confirmSelect();
-            channel.basicPublish("", "bootTestQueue", null, message.getBytes("UTF-8"));
-            if (channel.waitForConfirms()) {
-                System.out.println("消息成功发送...");
+            for(int i=0; i< 10; i++) {
+                logger_.info(String.format("开始发送第 %d 条消息",i));
+                message = message + " " + i;
+                channel.basicPublish("", "bootTestQueue", null, message.getBytes("UTF-8"));
+                if (channel.waitForConfirms()) {
+                    logger_.info(String.format("第 %d 条消息成功发送...",i));
+                }
             }
-        } catch (IOException | TimeoutException | InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
