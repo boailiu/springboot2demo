@@ -11,17 +11,17 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 @Component
-@RabbitListener(queues = "bootTestQueue")
-public class RabbitComsumer {
+//@RabbitListener(queues = "bootTestQueue2")
+public class RabbitComsumerTwo {
 
-    private static final Logger logger_ = LoggerFactory.getLogger(RabbitComsumer.class);
+    private static final Logger logger_ = LoggerFactory.getLogger(RabbitComsumerTwo.class);
 
     @RabbitHandler
-    public void process(byte[] message) {
-        logger_.info("message:" + new String(message));
+    public void process(String message){
+        logger_.info("message : " + message);
     }
 
-/*    @RabbitHandler
+    @RabbitHandler
     public void process(Message message, Channel channel) {
         try {
             channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
@@ -30,5 +30,5 @@ public class RabbitComsumer {
             e.printStackTrace();
         }
 
-    }*/
+    }
 }

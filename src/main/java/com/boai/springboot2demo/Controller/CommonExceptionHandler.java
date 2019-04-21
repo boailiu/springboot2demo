@@ -23,6 +23,7 @@ public class CommonExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public Map<String, Object> exHandler(Exception e) {
+        e.printStackTrace();
         HashMap<String, Object> result = new HashMap<>();
         result.put("code", 4000);
         result.put("msg", e.getMessage());

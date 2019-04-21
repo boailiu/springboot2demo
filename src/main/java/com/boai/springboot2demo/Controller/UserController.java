@@ -1,25 +1,22 @@
 package com.boai.springboot2demo.Controller;
 
-import com.boai.springboot2demo.Config.RabbitMQConfig;
 import com.boai.springboot2demo.Model.User;
 import com.boai.springboot2demo.Repository.UserRepository;
 import com.boai.springboot2demo.Service.UserService;
 import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.ConfirmListener;
+import com.rabbitmq.client.MessageProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeoutException;
 
 @RestController
@@ -30,15 +27,15 @@ public class UserController {
 
     private UserRepository uRepo;
     private UserService uService;
-    private AmqpTemplate amqpTemplate;
+    private RabbitTemplate rabbitTemplate;
     private Channel channel;
 
     @Autowired
-    public UserController(UserRepository uRepo, UserService userService, AmqpTemplate amqpTemplate,
+    public UserController(UserRepository uRepo, UserService userService, RabbitTemplate rabbitTemplate,
                           Channel channel) {
         this.uRepo = uRepo;
         this.uService = userService;
-        this.amqpTemplate = amqpTemplate;
+        this.rabbitTemplate = rabbitTemplate;
         this.channel = channel;
     }
 
@@ -97,11 +94,13 @@ public class UserController {
     @GetMapping("/sendMessage/{message}")
     public void sendMessage(@PathVariable("message") String message) {
 //        amqpTemplate.convertAndSend("bootTestQueue", message);
+        final SortedSet<Long> unConfirmSet = Collections.unmodifiableNavigableSet(new TreeSet<Long>());
         try {
             for(int i=0; i< 10; i++) {
                 logger_.info(String.format("开始发送第 %d 条消息",i));
                 message = message + " " + i;
                 channel.basicPublish("", "bootTestQueue", null, message.getBytes("UTF-8"));
+                //同步确认
                 if (channel.waitForConfirms()) {
                     logger_.info(String.format("第 %d 条消息成功发送...",i));
                 }
@@ -109,6 +108,80 @@ public class UserController {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    @GetMapping("/sendMessageAsyn/{message}")
+    public void sendMessageAsyn(@PathVariable("message") String message) {
+//        amqpTemplate.convertAndSend("bootTestQueue", message);
+        final SortedSet<Long> unConfirmSet = Collections.synchronizedSortedSet(new TreeSet<Long>());
+
+        //异步确认
+        channel.addConfirmListener(new ConfirmListener() {
+            /**
+             * 处理确认返回成功
+             * @param l 如果是多条，返回最后一条消息的tag
+             * @param b 是否为多条
+             */
+            @Override
+            public void handleAck(long l, boolean b) {
+                logger_.info("异步返回确认处理成功,deliverTag :" + l +" multiple : " + b);
+                if(b){
+                    logger_.info("multiple is true, unConfirmSet :" + unConfirmSet);
+                    unConfirmSet.headSet(l+1).clear();
+                    logger_.info("multiple is true,after remove unConfirmSet :" + unConfirmSet);
+                }else{
+                    logger_.info("multiple is false,unConfirmSet :" + unConfirmSet);
+                    unConfirmSet.remove(l);
+                    logger_.info("multiple is true,after remove unConfirmSet :" + unConfirmSet);
+                }
+            }
+
+            /**
+             * 处理确认返回失败
+             * @param l 如果是多条，返回最后一条消息的tag
+             * @param b 是否为多条
+             */
+            @Override
+            public void handleNack(long l, boolean b) {
+                logger_.info("异步返回确认处理失败,deliverTag：" + l + " multiple : " + b);
+                if(b){
+                    logger_.info("multiple is true, unConfirmSet :" + unConfirmSet);
+                    unConfirmSet.headSet(l+1).clear();
+                    logger_.info("multiple is true,after remove unConfirmSet :" + unConfirmSet);
+                }else{
+                    logger_.info("multiple is false,unConfirmSet :" + unConfirmSet);
+                    unConfirmSet.remove(l);
+                    logger_.info("multiple is true,after remove unConfirmSet :" + unConfirmSet);
+                }
+            }
+        });
+
+        try {
+            for(int i=0; i< 10; i++) {
+                logger_.info(String.format("开始发送第 %d 条消息",i));
+                message = message + " " + i;
+                long tag = channel.getNextPublishSeqNo();
+                logger_.info(String.format("第 %d 个消息发送的 deliverTag: %d",i,tag));
+                channel.basicPublish("", "bootTestQueue", MessageProperties.PERSISTENT_BASIC,
+                        message.getBytes("UTF-8"));
+                unConfirmSet.add(tag);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                channel.close();
+            } catch (IOException | TimeoutException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+    }
+
+    @GetMapping("/sendMessageWithConfirm/{message}")
+    public void sendMessageWithConfirm(@PathVariable("message") String message) {
+        rabbitTemplate.convertAndSend("bootTestQueue2", message);
     }
 
 

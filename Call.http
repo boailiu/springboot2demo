@@ -41,3 +41,11 @@ GET http://localhost:9455/user/search/test
 GET http://localhost:9455/user/sendMessage/first test Message
 
 ###
+
+GET http://localhost:9455/user/sendMessageAsyn/test Message
+
+###
+
+GET http://localhost:9455/user/sendMessageWithConfirm/test Message
+
+###
