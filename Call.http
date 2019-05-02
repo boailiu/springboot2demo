@@ -49,3 +49,7 @@ GET http://localhost:9455/user/sendMessageAsyn/test Message
 GET http://localhost:9455/user/sendMessageWithConfirm/test Message
 
 ###
+
+GET http://localhost:9455/api/mail/sendMail/This is test Text from dev
+
+###
