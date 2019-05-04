@@ -56,3 +56,7 @@ GET http://localhost:9455/api/mail/sendMail/This is test Text from dev
 GET http://localhost:9455/api/mail/sendMail/html
 
 ###
+
+GET http://localhost:9455/user/sendMessageWithExchange/test Message
+
+###

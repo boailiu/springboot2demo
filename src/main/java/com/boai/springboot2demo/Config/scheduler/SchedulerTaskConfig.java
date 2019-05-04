@@ -14,7 +14,7 @@ public class SchedulerTaskConfig {
     private static final Logger logger = LoggerFactory.getLogger(SchedulerTaskConfig.class);
 
     @Async
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 50000)
     public void getCurrentDate() {
         logger.info("此刻时间:" + LocalDateTime.now());
     }

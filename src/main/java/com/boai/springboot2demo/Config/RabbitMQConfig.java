@@ -5,12 +5,12 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.AcknowledgeMode;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.api.ChannelAwareMessageListener;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,14 +38,17 @@ public class RabbitMQConfig {
 
     private String queueName = "bootTestQueue";
 
+    final static String message = "topic.message";
+    final static String messages = "topic.messages";
+
 
     @Bean
-    public Queue bootTestQueue(){
+    public Queue bootTestQueue() {
         return new Queue("bootTestQueue");
     }
 
     @Bean
-    public ConnectionFactory connectionFactory(){
+    public ConnectionFactory connectionFactory() {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setUsername(userName);
         factory.setPassword(password);
@@ -56,7 +59,7 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Channel rabbitChannel(){
+    public Channel rabbitChannel() {
         ConnectionFactory factory = connectionFactory();
         Channel channel = null;
         try {
@@ -73,9 +76,9 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public CachingConnectionFactory getConn(){
+    public CachingConnectionFactory getConn() {
         CachingConnectionFactory conn = new CachingConnectionFactory();
-        conn.setAddresses(host +":" + port);
+        conn.setAddresses(host + ":" + port);
         conn.setUsername(userName);
         conn.setPassword(password);
         conn.setPublisherConfirms(true);
@@ -83,7 +86,7 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public SimpleMessageListenerContainer messageContainer(){
+    public SimpleMessageListenerContainer messageContainer() {
         SimpleMessageListenerContainer container =
                 new SimpleMessageListenerContainer(getConn());
         String queueName2 = "bootTestQueue2";
@@ -102,8 +105,34 @@ public class RabbitMQConfig {
             logger_.info("message : " + new String(body));
             /*为了保证永远不会丢失消息，RabbitMQ支持消息应答机制。
              当消费者接收到消息并完成任务后会往RabbitMQ服务器发送一条确认的命令，然后RabbitMQ才会将消息删除。*/
-            channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         });
         return container;
     }
+
+    @Bean
+    public Queue queueMessage() {
+        return new Queue(RabbitMQConfig.message);
+    }
+
+    @Bean
+    public Queue queueMessages() {
+        return new Queue(RabbitMQConfig.messages);
+    }
+
+    @Bean
+    public TopicExchange topicExchange(){
+        return new TopicExchange("exchangeTest");
+    }
+
+    @Bean
+    Binding bindingExchangeMessage(Queue queueMessage, TopicExchange exchange){
+        return BindingBuilder.bind(queueMessage).to(exchange).with("topic.message");
+    }
+
+    @Bean
+    Binding bindingExchangeMessages(Queue queueMessages,TopicExchange exchange){
+        return BindingBuilder.bind(queueMessages).to(exchange).with("topic.#");
+    }
+
 }

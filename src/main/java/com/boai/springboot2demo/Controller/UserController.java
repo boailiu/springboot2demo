@@ -96,13 +96,13 @@ public class UserController {
 //        amqpTemplate.convertAndSend("bootTestQueue", message);
         final SortedSet<Long> unConfirmSet = Collections.unmodifiableNavigableSet(new TreeSet<Long>());
         try {
-            for(int i=0; i< 10; i++) {
-                logger_.info(String.format("开始发送第 %d 条消息",i));
+            for (int i = 0; i < 10; i++) {
+                logger_.info(String.format("开始发送第 %d 条消息", i));
                 message = message + " " + i;
                 channel.basicPublish("", "bootTestQueue", null, message.getBytes("UTF-8"));
                 //同步确认
                 if (channel.waitForConfirms()) {
-                    logger_.info(String.format("第 %d 条消息成功发送...",i));
+                    logger_.info(String.format("第 %d 条消息成功发送...", i));
                 }
             }
         } catch (IOException | InterruptedException e) {
@@ -124,12 +124,12 @@ public class UserController {
              */
             @Override
             public void handleAck(long l, boolean b) {
-                logger_.info("异步返回确认处理成功,deliverTag :" + l +" multiple : " + b);
-                if(b){
+                logger_.info("异步返回确认处理成功,deliverTag :" + l + " multiple : " + b);
+                if (b) {
                     logger_.info("multiple is true, unConfirmSet :" + unConfirmSet);
-                    unConfirmSet.headSet(l+1).clear();
+                    unConfirmSet.headSet(l + 1).clear();
                     logger_.info("multiple is true,after remove unConfirmSet :" + unConfirmSet);
-                }else{
+                } else {
                     logger_.info("multiple is false,unConfirmSet :" + unConfirmSet);
                     unConfirmSet.remove(l);
                     logger_.info("multiple is true,after remove unConfirmSet :" + unConfirmSet);
@@ -144,11 +144,11 @@ public class UserController {
             @Override
             public void handleNack(long l, boolean b) {
                 logger_.info("异步返回确认处理失败,deliverTag：" + l + " multiple : " + b);
-                if(b){
+                if (b) {
                     logger_.info("multiple is true, unConfirmSet :" + unConfirmSet);
-                    unConfirmSet.headSet(l+1).clear();
+                    unConfirmSet.headSet(l + 1).clear();
                     logger_.info("multiple is true,after remove unConfirmSet :" + unConfirmSet);
-                }else{
+                } else {
                     logger_.info("multiple is false,unConfirmSet :" + unConfirmSet);
                     unConfirmSet.remove(l);
                     logger_.info("multiple is true,after remove unConfirmSet :" + unConfirmSet);
@@ -157,18 +157,18 @@ public class UserController {
         });
 
         try {
-            for(int i=0; i< 10; i++) {
-                logger_.info(String.format("开始发送第 %d 条消息",i));
+            for (int i = 0; i < 10; i++) {
+                logger_.info(String.format("开始发送第 %d 条消息", i));
                 message = message + " " + i;
                 long tag = channel.getNextPublishSeqNo();
-                logger_.info(String.format("第 %d 个消息发送的 deliverTag: %d",i,tag));
+                logger_.info(String.format("第 %d 个消息发送的 deliverTag: %d", i, tag));
                 channel.basicPublish("", "bootTestQueue", MessageProperties.PERSISTENT_BASIC,
                         message.getBytes("UTF-8"));
                 unConfirmSet.add(tag);
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             try {
                 channel.close();
             } catch (IOException | TimeoutException e) {
@@ -182,6 +182,14 @@ public class UserController {
     @GetMapping("/sendMessageWithConfirm/{message}")
     public void sendMessageWithConfirm(@PathVariable("message") String message) {
         rabbitTemplate.convertAndSend("bootTestQueue2", message);
+    }
+
+    @GetMapping("/sendMessageWithExchange/{message}")
+    public void sendMessageWithExchange(@PathVariable String message) {
+        //匹配topic.message 和 topic.#
+//        rabbitTemplate.convertAndSend("exchangeTest", "topic.message", message);
+        // 只匹配topic.#
+        rabbitTemplate.convertAndSend("exchangeTest", "topic.messages", message);
     }
 
 
