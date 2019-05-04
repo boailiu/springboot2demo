@@ -24,7 +24,8 @@ public class UserServiceImpl implements UserService {
         return repo.listUser();
     }
 
-    @Cacheable(cacheNames = "user",key = "#userId", condition = "#userId % 2 == 0")
+    @Cacheable(cacheNames = "userCacheTest", key = "#userId", condition = "#userId % 2 == 0",
+            cacheManager = "redisCacheManager")
     @Override
     public Map<String, Object> getUserMap(long userId) {
         return repo.getUserMap(userId);
