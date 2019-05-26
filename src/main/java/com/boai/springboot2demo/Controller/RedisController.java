@@ -79,4 +79,15 @@ public class RedisController {
         return map;
     }
 
+    @GetMapping
+    @RequestMapping("/loginFault/{phone}")
+    public void loginFaultCount(@PathVariable String phone) {
+        redisTemplate.opsForValue().setIfAbsent("userLogin:user" + phone, phone);
+        if (redisTemplate.opsForValue().increment("loginFault") <= 5) {
+            logger.info("user{} 可以登录", phone);
+        } else if (redisTemplate.opsForValue().increment("loginFault") > 5) {
+            logger.info("user{} 禁止登录", phone);
+        }
+    }
+
 }

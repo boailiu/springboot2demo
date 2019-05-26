@@ -26,6 +26,7 @@ GET http://localhost:9455/redis/addUser
 GET http://localhost:9455/redis/getUser
 
 ###
+GET http://localhost:9455/redis/loginFault/15895919068
 
 # https://blog.csdn.net/johnf_nash/article/details/87526631
 GET http://localhost:9455/user/getUserMap/2
