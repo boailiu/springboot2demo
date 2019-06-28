@@ -9,15 +9,83 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ExcelUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ExcelUtil.class);
+    private static Map<String, Object> ruleGroupMap = new HashMap<String, Object>() {
+        {
+            put("借款人提交的相关信息是否匹配、是否提供过虚假信息等", 1);
+            put("借款人身份异常", 2);
+            put("借款人命中高风险名单", 3);
+            put("借款人命中关注名单", 4);
+            put("借款人多头借贷及负债", 5);
+            put("借款人行为异常", 6);
+            put("借款人关系异常", 7);
+            put("借款人场景异常", 8);
+            put("贷款车辆信息异常", 9);
+            put("贷款车辆命中高风险名单", 10);
+            put("贷款车辆触及风险关系网", 11);
+            put("贷款车辆场景异常", 12);
+        }
+    };
 
-    private static void readExcel(String filePath) {
+    private static Map<String, Object> ruleSourceMap = new HashMap<String, Object>() {
+        {
+            put("CTH", "keen");
+            put("JA", "JA");
+            put("JXL", "juxinli");
+            put("TD", "tongdun");
+            put("TX", "tenxun");
+        }
+    };
+
+    /**
+     * excel 列需要按照固定顺序
+     * 1.rule_id
+     * 2.rule_code
+     * 3.rule_showName
+     * 4.rule_name
+     * 5.other_id
+     * 6.condition_description
+     * 7.cover_rule_cert_mobile
+     * 8.cover_rule_except_cert_mobile
+     * 9.cover_date_group
+     * 10.is_invisible
+     * 11.risk_level
+     * 12.risk_score
+     * 13.rule_group
+     * 14.rule_sort
+     * 15.rule_source
+     * 16.risk_type
+     * 17.enabled
+     *
+     */
+    private static void readGammaRuleExcelAndSaveSql(String filePath, String destFilePath) {
+        File file = new File(destFilePath);
+        if (!file.getParentFile().exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            file.getParentFile().mkdirs();
+        }
+
+        FileOutputStream out = null;
+        try {
+            file.deleteOnExit();
+            //noinspection ResultOfMethodCallIgnored
+            file.createNewFile();
+            out = new FileOutputStream(file);
+        } catch (IOException e) {
+            logger.error("创建目标文件失败", e);
+        }
+
+
         String sqlTemplate = "INSERT INTO `gamma_rc`.`def_pre_loan_rule` (`rule_id`, `rule_type`, `rule_code`, `rule_show_name`, `rule_name`, `other_id`, `condition_description`, `cover_rule_cert_mobile`, `cover_rule_except_cert_mobile`, `cover_date_group`, `is_invisible`, `risk_level`, `score_coefficient`, `risk_score`, `rule_group`, `rule_sort`, `rule_source`, `risk_type`, `enabled`) " +
-                "VALUES ('%s', NULL, '%s', '%s', '%s', '%s', NULL, NULL, NULL, NULL, NULL, '%s', '0', '%s', '%s', '%s', '%s', '%s', '%s');";
+                "VALUES ('%s', NULL, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '0', '%s', '%s', '%s', '%s', '%s', '%s');";
         try {
             XSSFWorkbook workbook = new XSSFWorkbook(new File(filePath));
             //获取sheet页
@@ -25,57 +93,105 @@ public class ExcelUtil {
             //获取行数
             int rows = firstSheet.getPhysicalNumberOfRows();
             String ruleId = null, ruleCode = null, ruleShowName = null, ruleName = null,
-                    description = null, riskLevel = null, riskScore = null, ruleGroup = null,
+                    otherId = null /*对应的同盾id */, description = null,
+                    coverRuleCertMobile = null /*身份证号覆盖手机号 */, coverRuleExceptCertMobile = null /*除身份证手机号的其他覆盖 */,
+                    coverDateGroup = null, isInvisible = null,
+                    riskLevel = null, riskScore = null, ruleGroup = null,
                     ruleSort = null, ruleSource = null, riskType = null, enabled = null;
             for (int i = 1; i < rows; i++) {
                 XSSFRow row = firstSheet.getRow(i);
-                for (int j = 0; j <= 11; j++) {
+                for (int j = 0; j <= 16; j++) {
                     XSSFCell cell = row.getCell(j);
-                    String value;
+                    if (cell == null) continue;
+                    String stringValue;
+                    double numericCellValue;
                     switch (cell.getCellType()) {
                         case NUMERIC:
-                            value = String.valueOf(cell.getNumericCellValue());
+//                            value = String.valueOf(cell.getNumericCellValue());
+                            numericCellValue = cell.getNumericCellValue();
                             switch (j) {
                                 case 0:
-                                    ruleId = value;
+                                    ruleId = String.valueOf((int) numericCellValue);
                                     break;
-                                case 5:
-                                    riskLevel = value;
+                                case 4:
+                                    otherId = String.valueOf((int) numericCellValue);
                                     break;
                                 case 6:
-                                    riskScore = value;
+                                    coverRuleCertMobile = String.valueOf((int) numericCellValue);
+                                    break;
+                                case 7:
+                                    coverRuleExceptCertMobile = String.valueOf((int) numericCellValue);
                                     break;
                                 case 8:
-                                    ruleSort = value;
+                                    coverDateGroup = String.valueOf((int) numericCellValue);
                                     break;
-                                case 10:
-                                    riskType = value;
+                                case 9:
+                                    isInvisible = String.valueOf((int) numericCellValue);
                                     break;
                                 case 11:
-                                    enabled = value;
+                                    riskScore = String.valueOf(numericCellValue);
+                                    break;
+                                case 13:
+                                    ruleSort = String.valueOf((int) numericCellValue);
+                                    break;
+                                case 15:
+                                    riskType = String.valueOf((int) numericCellValue);
+                                    break;
+                                case 16:
+                                    enabled = String.valueOf((int) numericCellValue);
                                     break;
                             }
                             break;
                         case STRING:
-                            value = cell.getStringCellValue();
+                            stringValue = cell.getStringCellValue();
                             switch (j) {
                                 case 1:
-                                    ruleCode = value;
+                                    ruleCode = stringValue;
                                     break;
                                 case 2:
-                                    ruleShowName = value;
+                                    ruleShowName = stringValue;
                                     break;
                                 case 3:
-                                    ruleName = value;
+                                    ruleName = stringValue;
                                     break;
-                                case 4:
-                                    description = value;
+                                case 5:
+                                    description = stringValue;
+                                    //数据库字段限制
+                                    if (description.length() >= 190) {
+                                        description = description.substring(0, 190);
+                                    }
                                     break;
-                                case 7:
-                                    ruleGroup = value;
+                                case 10:
+                                    switch (stringValue) {
+                                        case "1高风险":
+                                            riskLevel = "3";
+                                            break;
+                                        case "2中风险":
+                                            riskLevel = "2";
+                                            break;
+                                        case "3低风险":
+                                            riskLevel = "1";
+                                            break;
+                                        default:
+                                            riskLevel = stringValue;
+                                            break;
+                                    }
                                     break;
-                                case 9:
-                                    ruleSource = value;
+                                case 12:
+                                    if (ruleGroupMap.keySet().contains(stringValue)) {
+                                        ruleGroup = ruleGroupMap.getOrDefault(stringValue,
+                                                                              "规则分组不正确").toString();
+                                    } else {
+                                        ruleGroup = stringValue;
+                                    }
+                                    break;
+                                case 14:
+                                    if (ruleSourceMap.keySet().contains(stringValue)) {
+                                        ruleSource = ruleSourceMap.getOrDefault(stringValue,
+                                                                                "规则来源不正确").toString();
+                                    } else {
+                                        ruleSource = stringValue;
+                                    }
                                     break;
                             }
                             break;
@@ -83,16 +199,35 @@ public class ExcelUtil {
 //                    logger.info(String.format("第[%d]行,第[%d]单元格内容:[%s]", i, j,
 //                            value));
                 }
-                String sql = String.format(sqlTemplate, ruleId, ruleCode, ruleShowName, ruleName, description, riskLevel, riskScore,
-                        ruleGroup, ruleSort, ruleSource, riskType, enabled);
+                String sql = String.format(sqlTemplate,
+                                           ruleId, ruleCode, ruleShowName, ruleName, otherId, description,
+                                           coverRuleCertMobile, coverRuleExceptCertMobile, coverDateGroup, isInvisible,
+                                           riskLevel, riskScore,
+                                           ruleGroup, ruleSort, ruleSource, riskType, enabled);
+                sql = sql.replaceAll("'null'", "NULL");
                 logger.info(sql);
+                assert out != null;
+                out.write(sql.getBytes(StandardCharsets.UTF_8));
+                out.write(System.getProperty("line.separator").getBytes(StandardCharsets.UTF_8));
+                out.write(System.getProperty("line.separator").getBytes(StandardCharsets.UTF_8));
             }
         } catch (IOException | InvalidFormatException e) {
             logger.error("读取excel文件出错", e);
         }
+        try {
+            assert out != null;
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            logger.error("关闭文件出错", e);
+        }
     }
 
     public static void main(String[] args) {
-        readExcel("D:\\rule.xlsx");
+        String destFilePath = "D:\\sqlOutput\\sql.txt";
+        String rulePath = "D:\\rule.xlsx";
+        readGammaRuleExcelAndSaveSql(rulePath, destFilePath);
+//        System.out.println(File.separator);
+//        System.out.println(System.getProperty("line.separator"));
     }
 }

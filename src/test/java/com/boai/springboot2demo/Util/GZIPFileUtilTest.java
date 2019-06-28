@@ -11,6 +11,6 @@ public class GZIPFileUtilTest {
 
     @Test
     public void fileTest(){
-        GZIPFileUtil.doUnCompressFile();
+//        GZIPFileUtil.doUnCompressFile();
     }
 }
