@@ -16,7 +16,7 @@ public class InputStreamTest {
         StringBuilder builder = new StringBuilder();
         int a;
         while ((a = fileInputStream.read()) != -1) {
-            builder.append(String.valueOf((char) a));
+            builder.append((char) a);
         }
         fileInputStream.close();
         System.out.println(builder.toString());
