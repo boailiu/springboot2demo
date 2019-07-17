@@ -77,4 +77,6 @@ public class GetJxlHistoryResult {
         requestUrl = requestUrl + "&ugid=" + userGridId;
         logger.info(requestUrl);
     }
+
+
 }
