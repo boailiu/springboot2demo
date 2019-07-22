@@ -5,3 +5,5 @@ https://gitee.com/52itstyle/spring-boot-elasticsearch
 https://gitee.com/geek_qi/cloud-platform
 https://gitee.com/52itstyle/spring-boot-seckill
 https://gitee.com/JeeHuangBingGui/jeeSpringCloud
+https://gitee.com/bweird/lenosp
+https://gitee.com/jamen/slife
