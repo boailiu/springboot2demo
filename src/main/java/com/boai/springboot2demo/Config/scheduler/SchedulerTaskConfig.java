@@ -1,5 +1,6 @@
 package com.boai.springboot2demo.Config.scheduler;
 
+import com.boai.springboot2demo.Util.DateTimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +17,6 @@ public class SchedulerTaskConfig {
     @Async
     @Scheduled(fixedRate = 50000)
     public void getCurrentDate() {
-        logger.info("此刻时间:" + LocalDateTime.now());
+        logger.info("此刻时间:" + DateTimeUtil.formatDateTime("yyyy-MM-dd HH:mm:ss", LocalDateTime.now()));
     }
 }

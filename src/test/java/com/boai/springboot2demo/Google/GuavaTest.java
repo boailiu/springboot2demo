@@ -1,9 +1,13 @@
+package com.boai.springboot2demo.Google;
+
 import com.google.common.cache.*;
+import com.google.common.primitives.Doubles;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Arrays;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -54,17 +58,6 @@ public class GuavaTest {
             e.printStackTrace();
         }*/
 
-        final LoadingCache<Object, Object> build = CacheBuilder
-                .newBuilder()
-                .maximumSize(10)
-                .build(
-                        new CacheLoader<Object, Object>() {
-                            @Override
-                            public Object load(Object o) {
-                                return "test";
-                            }
-                        });
-
         //清除
         cache.put("key2", 2);
         cache.put("key3", 3);
@@ -78,4 +71,47 @@ public class GuavaTest {
 
 
     }
+
+    @Test
+    public void LoadingCacheTest() throws Exception {
+        final CacheLoader<String, Map<String, Object>> cacheLoader = new CacheLoader<String, Map<String, Object>>() {
+            @Override
+            public Map<String, Object> load(String key) {
+                return new HashMap<String, Object>() {{
+                    put("test", 1);
+                    put("test2", 2);
+                    put("test3", 3);
+                }};
+            }
+        };
+        final LoadingCache<String, Map<String, Object>> loadingCache = CacheBuilder
+                .newBuilder()
+                .maximumSize(10)
+                .recordStats() //开启统计功能
+                .build(cacheLoader);
+        final Map<String, Object> map = loadingCache.get("test1");
+        System.out.println(map);
+        System.out.println(map.get("test"));
+        System.out.println(map.get("test1"));
+        System.out.println();
+        System.out.println(loadingCache.asMap());
+        final Map<String, Object> map2 = loadingCache.get("test2");
+        System.out.println(map2);
+        System.out.println(loadingCache.asMap());
+        System.out.println("-----------------");
+        cacheLoader.reload("test1",map);
+
+        System.out.println(loadingCache.get("test1"));
+        loadingCache.refresh("test1");
+        System.out.println(loadingCache.get("test1"));
+    }
+
+    @Test
+    public void primitives(){
+        final List<Double> doubles = Doubles.asList(1.2d, 2.4d);
+        System.out.println(doubles);
+        final Double max = Collections.max(doubles);
+        System.out.println(max);
+    }
+
 }

@@ -10,7 +10,6 @@ import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.api.ChannelAwareMessageListener;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -90,7 +89,8 @@ public class RabbitMQConfig {
         SimpleMessageListenerContainer container =
                 new SimpleMessageListenerContainer(getConn());
         String queueName2 = "bootTestQueue2";
-        container.setQueueNames(queueName, queueName2);
+//        container.setQueueNames(queueName, queueName2);
+        container.setQueueNames(queueName);
         container.setExposeListenerChannel(true);
         container.setMaxConcurrentConsumers(10);
         container.setConcurrentConsumers(1);
@@ -102,7 +102,7 @@ public class RabbitMQConfig {
              */
             channel.basicQos(1);
             byte[] body = message.getBody();
-            logger_.info("message : " + new String(body));
+            logger_.info("receiveMessage : " + new String(body));
             /*为了保证永远不会丢失消息，RabbitMQ支持消息应答机制。
              当消费者接收到消息并完成任务后会往RabbitMQ服务器发送一条确认的命令，然后RabbitMQ才会将消息删除。*/
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
@@ -121,17 +121,17 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public TopicExchange topicExchange(){
+    public TopicExchange topicExchange() {
         return new TopicExchange("exchangeTest");
     }
 
     @Bean
-    Binding bindingExchangeMessage(Queue queueMessage, TopicExchange exchange){
+    Binding bindingExchangeMessage(Queue queueMessage, TopicExchange exchange) {
         return BindingBuilder.bind(queueMessage).to(exchange).with("topic.message");
     }
 
     @Bean
-    Binding bindingExchangeMessages(Queue queueMessages,TopicExchange exchange){
+    Binding bindingExchangeMessages(Queue queueMessages, TopicExchange exchange) {
         return BindingBuilder.bind(queueMessages).to(exchange).with("topic.#");
     }
 

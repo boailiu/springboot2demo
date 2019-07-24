@@ -29,7 +29,7 @@ public class WebLogAspect {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         assert attributes != null;
         HttpServletRequest request = attributes.getRequest();
-        logger.info("requestUrl :" + request.getRequestURL());
+        logger.info("requestUrl from aspect:" + request.getRequestURL());
         Object proceed = joinPoint.proceed();
         if (proceed != null) {
             if (proceed instanceof User) {
