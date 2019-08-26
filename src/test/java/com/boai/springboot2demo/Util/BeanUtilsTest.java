@@ -1,7 +1,6 @@
 package com.boai.springboot2demo.Util;
 
 import com.boai.springboot2demo.Model.User;
-import com.boai.springboot2demo.Model.UserCopy;
 import org.apache.commons.beanutils.BeanUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
