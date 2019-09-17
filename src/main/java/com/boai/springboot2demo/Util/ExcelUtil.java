@@ -37,6 +37,20 @@ public class ExcelUtil {
         }
     };
 
+    private static Map<String, Object> ruleGroupMap2 = new HashMap<String, Object>() {
+        {
+            put("身份风险-借款人", 1);
+            put("行为风险-借款人", 2);
+            put("关系风险-借款人", 3);
+            put("身份风险-车辆", 4);
+            put("行为风险-车辆", 5);
+            put("关系风险-车辆", 6);
+            put("身份风险-联系人", 7);
+            put("行为风险-联系人", 8);
+            put("关系风险-联系人", 9);
+        }
+    };
+
     private static Map<String, Object> ruleSourceMap = new HashMap<String, Object>() {
         {
             put("CTH", "keen");
@@ -44,6 +58,7 @@ public class ExcelUtil {
             put("JXL", "juxinli");
             put("TD", "tongdun");
             put("TX", "tenxun");
+            put("CDD", "keen");
         }
     };
 
@@ -66,7 +81,6 @@ public class ExcelUtil {
      * 15.rule_source
      * 16.risk_type
      * 17.enabled
-     *
      */
     private static void readGammaRuleExcelAndSaveSql(String filePath, String destFilePath) {
         File file = new File(destFilePath);
@@ -86,8 +100,12 @@ public class ExcelUtil {
         }
 
 
-        String sqlTemplate = "INSERT INTO `gamma_rc`.`def_pre_loan_rule` (`rule_id`, `rule_type`, `rule_code`, `rule_show_name`, `rule_name`, `other_id`, `condition_description`, `cover_rule_cert_mobile`, `cover_rule_except_cert_mobile`, `cover_date_group`, `is_invisible`, `risk_level`, `score_coefficient`, `risk_score`, `rule_group`, `rule_sort`, `rule_source`, `risk_type`, `enabled`) " +
-                "VALUES ('%s', NULL, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '0', '%s', '%s', '%s', '%s', '%s', '%s');";
+        String sqlTemplate = "INSERT INTO `gamma_rc`.`def_pre_loan_rule` (`rule_id`, `rule_type`, `rule_code`, " +
+                "`rule_show_name`, `rule_name`, `other_id`, `condition_description`, `cover_rule_cert_mobile`, " +
+                "`cover_rule_except_cert_mobile`, `cover_date_group`, `is_invisible`, `risk_level`, `score_coefficient`, " +
+                "`risk_score`, `rule_group`, `rule_sort`, `rule_source`, `risk_type`, `enabled`,`rule_group2`) " +
+                "VALUES ('%s', NULL, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '0', '%s', '%s', '%s', " +
+                "'%s', '%s', '%s','%s');";
         try {
             XSSFWorkbook workbook = new XSSFWorkbook(new File(filePath));
             //获取sheet页
@@ -102,8 +120,9 @@ public class ExcelUtil {
                         coverRuleCertMobile = null /*身份证号覆盖手机号 */, coverRuleExceptCertMobile = null /*除身份证手机号的其他覆盖 */,
                         coverDateGroup = null, isInvisible = null,
                         riskLevel = null, riskScore = null, ruleGroup = null,
-                        ruleSort = null, ruleSource = null, riskType = null, enabled = null;
-                for (int j = 0; j <= 16; j++) {
+                        ruleSort = null, ruleSource = null, riskType = null, enabled = null,
+                        ruleGroup2 = null;
+                for (int j = 0; j <= 17; j++) {
                     XSSFCell cell = row.getCell(j);
                     if (cell == null) continue;
                     String stringValue;
@@ -196,6 +215,12 @@ public class ExcelUtil {
                                         ruleSource = stringValue;
                                     }
                                     break;
+                                case 17:
+                                    if (ruleGroupMap2.keySet().contains(stringValue)) {
+                                        ruleGroup2 = ruleGroupMap2.getOrDefault(stringValue, "细分组别不正确").toString();
+                                    } else {
+                                        ruleGroup2 = stringValue;
+                                    }
                             }
                             break;
                     }
@@ -206,7 +231,7 @@ public class ExcelUtil {
                                            ruleId, ruleCode, ruleShowName, ruleName, otherId, description,
                                            coverRuleCertMobile, coverRuleExceptCertMobile, coverDateGroup, isInvisible,
                                            riskLevel, riskScore,
-                                           ruleGroup, ruleSort, ruleSource, riskType, enabled);
+                                           ruleGroup, ruleSort, ruleSource, riskType, enabled, ruleGroup2);
                 sql = sql.replaceAll("'null'", "NULL");
                 logger.info(sql);
                 assert out != null;
@@ -234,7 +259,7 @@ public class ExcelUtil {
 //        System.out.println(System.getProperty("line.separator"));
     }
 
-    public List<String> getStringList(){
+    public List<String> getStringList() {
         return new ArrayList<>();
     }
 }
