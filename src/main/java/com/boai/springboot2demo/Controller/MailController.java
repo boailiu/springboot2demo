@@ -51,9 +51,15 @@ public class MailController {
         helper.setTo("18810901242@163.com");
         helper.setSubject("来自springbootdemo的测试邮件（dev）");
         String htmlContent = "<html><body><div>hello mail</div></body></html>";
-        helper.setText(htmlContent,true);
+        helper.setText(htmlContent, true);
         javaMailSender.send(mimeMessage);
         map.put("code", 2000);
         return map;
+    }
+
+    @GetMapping("/")
+    public String test() {
+        logger.info("test...");
+        return "test";
     }
 }

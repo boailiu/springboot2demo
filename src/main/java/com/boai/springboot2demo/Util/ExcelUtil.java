@@ -185,13 +185,22 @@ public class ExcelUtil {
                                     break;
                                 case 10:
                                     switch (stringValue) {
-                                        case "1高风险":
+/*                                        case "1高风险":
                                             riskLevel = "3";
                                             break;
                                         case "2中风险":
                                             riskLevel = "2";
                                             break;
                                         case "3低风险":
+                                            riskLevel = "1";
+                                            break;*/
+                                        case "3高风险":
+                                            riskLevel = "3";
+                                            break;
+                                        case "2中风险":
+                                            riskLevel = "2";
+                                            break;
+                                        case "1低风险":
                                             riskLevel = "1";
                                             break;
                                         default:

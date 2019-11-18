@@ -1,6 +1,5 @@
 package com.boai.springboot2demo.Aspect;
 
-import com.boai.springboot2demo.Model.User;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -32,9 +31,9 @@ public class WebLogAspect {
         logger.info("requestUrl from aspect:" + request.getRequestURL());
         Object proceed = joinPoint.proceed();
         if (proceed != null) {
-            if (proceed instanceof User) {
+/*            if (proceed instanceof User) {
                 ((User) proceed).setEmail("newEmail@123.com");
-            }
+            }*/
             logger.info("return result :" + proceed.toString());
         }
         return proceed;
